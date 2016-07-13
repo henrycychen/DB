@@ -2,9 +2,9 @@
 This is a Dropbox API. All information can be found at the below web address:
 https://www.dropbox.com/developers/documentation/http/documentation.
 """
+import tempfile
 import json
 import pytest
-import requests
 import time
 import os
 from helper_library_DB import Dropbox
@@ -13,13 +13,18 @@ from helper_library_DB import Fake
 d = Dropbox()
 f = Fake()
 
+#create a temporary file to memory
+tf = tempfile.NamedTemporaryFile(delete=False)
+
+@pytest.mark.upload
 # Objective - Test if the api can upload a file to DB.
 # Expected Outcome - Assert http status code == 200 and use the search
 # api to see that the file exists.
 def test_upload_validation():
 
-    #Creating a fake directory name (First 4 lines)
+    #Creating a fake directory name (First 5 lines)
     fake_name = f.create_file_name()
+    fake_file = tf.name
     base_dir = "{\"path\":\"/"
     filename = fake_name+"\"}"
     db_path = os.path.join(base_dir, filename)
@@ -29,7 +34,7 @@ def test_upload_validation():
         "Content-Type": "application/octet-stream",
         "Dropbox-API-Arg": db_path
     }
-    my_data = open("C:/Users/Henry/Pictures/IMG_0399.JPG", "rb").read()
+    my_data = open(fake_file, "rb").read()
     r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
 
     #Have to set a delay, otherwise the assert will check before the file has
