@@ -43,8 +43,8 @@ class Fake(object):
     def create_file_name(self):
         ext_list = ['.txt', '.mpg', '.jpg']
         chosen_ext = ext_list[random.randint(0,2)]
-        return faker.first_name() + chosen_ext
+        return str(random.randint(0,10000000)) + chosen_ext
 
     def create_file(self,fname=''):
-        new_file = open(fname, 'a+')
+        new_file = open(fname, 'w+')
         new_file.truncate(random.randint(0,1024*1024))
