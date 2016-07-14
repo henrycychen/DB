@@ -122,6 +122,7 @@ def test_upload_mode_add():
     fake_file = tf.name
     x = 1
     while x < 3:
+        #Create a file size > than a meg and increase during the 2nd iteration
         tf.write('Hello World!!' * (100000*x))
         base_dir = "{\"path\":\"/"
         filename = fake_name+"\",\"autorename\":true,\"mode\":{\".tag\":\"add\"}}"
@@ -134,26 +135,17 @@ def test_upload_mode_add():
         }
         my_data = open(fake_file, "rb").read()
         r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+        #whileloop stopper
         x += 1
 
+    #Need this time delay for information to post to their database.
     time.sleep(20)
 
     my_data2 = {"path": "", "query": fake_name}
     r2 = d.db_search(my_data2=my_data2)
     check_assert = json.loads(r2.text)['matches'][1]['metadata']['name']
+    #The string indexing below follows the DB autorename business logic
     assert check_assert == (fake_name[0:-4]+' (1)'+fake_name[-4::])
-
-# 1) Same file names don't get added.
-# 2) Different files names get added
-# 3) Size of file doesn't matter
-# 4) Client modified works
-# 5) Add, update, overwrite modes do not work
-# 6) Overwrite when it is different picture - same name.
-
-
-
-
-
 
 """
 # Objective - Make sure there is an existing file before uploading the
