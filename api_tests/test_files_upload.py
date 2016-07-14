@@ -45,6 +45,7 @@ def test_upload_validation():
     check_assert = json.loads(r2.text)['matches'][0]['metadata']['name']
     assert r1.status_code == 200 and check_assert == fake_name
 
+
 @pytest.mark.upload
 # Objective - Input an acceptable upload path to upload a file to DB.
 # Expected Outcome - Assert that the file was uploaded using the search
@@ -107,7 +108,6 @@ def test_upload_path_invalid():
     r1.content == 'Error in call to API function "files/upload": HTTP header ' \
                   '"Dropbox-API-Arg": could not decode input as JSON'
 
-
 @pytest.mark.upload
 # Objective - Make sure there is an existing file before uploading the
 # same file. Select mode:add when uploading.
@@ -115,44 +115,33 @@ def test_upload_path_invalid():
 # find the file name that has been overwritten with "<filename>(2).ext"
 def test_upload_mode_add():
 
-    #create a temporary file to memory (putting this at the top so it's
-    # not confusing.
-    tf1 = tempfile.NamedTemporaryFile(delete=False)
-    tf2 = tempfile.NamedTemporaryFile(delete=False)
-
-    fake_file1 = tf1.name
-    fake_file2 = tf2.name
-
-    #Create the first file so it exists!
+    #Creating a LOCAL fake file name
     fake_name = f.create_file_name()
-    base_dir = "{\"path\":\"/"
-    filename = "test/"+fake_name+"\"}"
-    db_path = os.path.join(base_dir, filename)
-    my_headers = {
-        "Authorization": d.authorization,
-        "Content-Type": "application/octet-stream",
-        "Dropbox-API-Arg": db_path
-    }
-    my_data = open(fake_file1, "rb").read()
-        #open("C:/Users/Henry/Pictures/IMG_0483.JPG", "rb").read()
-    r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+    #create a temporary file to memory
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    fake_file = tf.name
+    x = 1
+    while x < 3:
+        tf.write('Hello World!!' * (100000*x))
+        base_dir = "{\"path\":\"/"
+        filename = fake_name+"\",\"autorename\":true,\"mode\":{\".tag\":\"add\"}}"
+        db_path = os.path.join(base_dir, filename)
+
+        my_headers = {
+            "Authorization": d.authorization,
+            "Content-Type": "application/octet-stream",
+            "Dropbox-API-Arg": db_path
+        }
+        my_data = open(fake_file, "rb").read()
+        r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+        x += 1
 
     time.sleep(20)
 
-    #Create the second file for testing the mode!
-    base_dir2 = "{\"path\":\"/"
-    #Adding the mode
-    filename2 = "test/"+fake_name+"\",\"autorename\":true,\"mode\":{\".tag\":\"add\"}}"
-    db_path = os.path.join(base_dir2, filename2)
-
-    my_headers2 = {
-        "Authorization": d.authorization,
-        "Content-Type": "application/octet-stream",
-        "Dropbox-API-Arg": db_path
-    }
-    my_data2 = open(fake_file2, "rb").read()
-    r2 = d.db_upload(my_headers=my_headers2,my_data=my_data2)
-    r2.text
+    my_data2 = {"path": "", "query": fake_name}
+    r2 = d.db_search(my_data2=my_data2)
+    check_assert = json.loads(r2.text)['matches'][1]['metadata']['name']
+    assert check_assert == (fake_name[0:-4]+' (1)'+fake_name[-4::])
 
 # 1) Same file names don't get added.
 # 2) Different files names get added
@@ -161,16 +150,10 @@ def test_upload_mode_add():
 # 5) Add, update, overwrite modes do not work
 # 6) Overwrite when it is different picture - same name.
 
-"""
-    #Have to set a delay, otherwise the assert will check before the file has
-    # been uploaded into the DB database.
-    time.sleep(10)
 
-    my_data2 = {"path": "", "query": fake_name}
-    r2 = d.db_search(my_data2=my_data2)
-    check_assert = json.loads(r2.text)['matches'][0]['metadata']['name']
-    assert r1.status_code == 200 and check_assert == fake_name
-"""
+
+
+
 
 """
 # Objective - Make sure there is an existing file before uploading the
