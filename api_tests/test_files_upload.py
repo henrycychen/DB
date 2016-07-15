@@ -13,7 +13,7 @@ from helper_library_DB import Fake
 
 d = Dropbox()
 f = Fake()
-
+"""
 @pytest.mark.upload
 # Objective - Test if the api can upload a file to DB.
 # Expected Outcome - Assert http status code == 200 and use the search
@@ -132,6 +132,7 @@ def test_upload_mode_add():
     #The string indexing below follows the DB autorename business logic
     assert check_assert == (fake_name[0:-4]+' (1)'+fake_name[-4::]) and \
            r1.status_code == 200
+
 @pytest.mark.upload
 # Objective - Make sure there is an existing file before uploading the
 # same file. Select mode:upload when uploading.
@@ -406,8 +407,94 @@ def test_upload_response_pathlower():
     tf = tempfile.NamedTemporaryFile(delete=False)
     fake_file = tf.name
     tfile = tf.write('Hello World!!' * (100000))
-    #Use os stat info to find the size of the file.
-    statinfo = os.stat(fake_file)
+    base_dir = "{\"path\":\"/"
+    filename = fake_name+"\"}"
+    db_path = os.path.join(base_dir, filename)
+    my_headers = {
+        "Authorization": d.authorization,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": db_path
+    }
+    my_data = open(fake_file, "rb").read()
+    r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+    #Have to set a delay, otherwise the assert will check before the file has
+    # been uploaded into the DB database.
+    time.sleep(10)
+    my_data2 = {"path": "", "query": fake_name}
+    r2 = d.db_search(my_data2=my_data2)
+    check_assert = json.loads(r2.text)['matches'][0]['metadata']['path_lower']
+    assert r1.status_code == 200 and check_assert == '/'+fake_name
+
+# Objective - Create a malformed path so that there is an error.
+# Expected Outcome - Assert http code != 200 and will receive a
+# malformed response error message stating that the file could not be
+# saved.
+def test_upload_error_malformed_path():
+    #Creating a fake file name
+    fake_name = f.create_file_name()
+    #create a temporary file to memory
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    fake_file = tf.name
+    base_dir = "{\"path\":\"/"
+    #creating a malformed path
+    filename = fake_name+"////////////////\"}"
+    db_path = os.path.join(base_dir, filename)
+    my_headers = {
+        "Authorization": d.authorization,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": db_path
+    }
+    my_data = open(fake_file, "rb").read()
+    r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+    #Have to set a delay, otherwise the assert will check before the file has
+    # been uploaded into the DB database.
+    time.sleep(10)
+    my_data2 = {"path": "", "query": fake_name}
+    r2 = d.db_search(my_data2=my_data2)
+    check_assert = json.loads(r2.text)['matches']
+    assert r1.status_code != 200 and check_assert == []
+
+@pytest.mark.upload
+# Objective - Upload a file or folder with an inappropriate name or name
+# format.
+# Expected Outcome - Assert http code != 200 and use the search api to
+# assert the file does not exist.
+def test_upload_error_disallowed_name():
+    #Creating an inappropriate filename for the test
+    fake_name = '/*&(@!)$(@*!&@^#%$&#||'
+    #create a temporary file to memory
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    fake_file = tf.name
+    base_dir = "{\"path\":\"/"
+    filename = fake_name+"\"}"
+    db_path = os.path.join(base_dir, filename)
+    my_headers = {
+        "Authorization": d.authorization,
+        "Content-Type": "application/octet-stream",
+        "Dropbox-API-Arg": db_path
+    }
+    my_data = open(fake_file, "rb").read()
+    r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
+    #Have to set a delay, otherwise the assert will check before the file has
+    # been uploaded into the DB database.
+    time.sleep(10)
+    my_data2 = {"path": "", "query": fake_name}
+    r2 = d.db_search(my_data2=my_data2)
+    check_assert = json.loads(r2.text)['matches']
+    assert r1.status_code != 200 and check_assert == []
+"""
+@pytest.mark.upload
+# Objective - Create a situation where the user goes over the available
+# space (bytes) when uploading a file (150mb).
+# Expected Outcome - Assert http code != 200 and use the search api to
+# assert the file does not exist.
+def test_upload_error_insufficient_space():
+    #Creating a fake file name
+    fake_name = f.create_file_name()
+    #create a temporary file to memory
+    tf = tempfile.NamedTemporaryFile(delete=False)
+    fake_file = tf.name
+    tfile = tf.write('Hello World!!' * (100000*150))
     base_dir = "{\"path\":\"/"
     filename = fake_name+"\"}"
     db_path = os.path.join(base_dir, filename)
@@ -427,28 +514,11 @@ def test_upload_response_pathlower():
     assert r1.status_code == 200 and check_assert == '/'+fake_name
 
 """
-# Objective - Create an error that returns a malformed response.
-# Expected Outcome - Assert http code != 200 and will receive a
-# malformed response error message stating that the file could not be
-# saved.
-def test_upload_error_malformed_path():
-    assert True == False
 # Objective - Create a situation that does not give the user permission
 # to write to the target location.
 # Expected Outcome - Assert http code != 200 and use the search api to
 # assert the file does not exist.
 def test_upload_error_no_write_permission():
     assert True == False
-# Objective - Create a situation where the user goes over the available
-# space (bytes) when uploading a file.
-# Expected Outcome - Assert http code != 200 and use the search api to
-# assert the file does not exist.
-def test_upload_error_insufficient_space():
-    assert True == False
-# Objective - Upload a file or folder with an inappropriate name or name
-# format.
-# Expected Outcome - Assert http code != 200 and use the search api to
-# assert the file does not exist.
-def test_upload_error_disallowed_name():
-    assert True == False
+
 """
