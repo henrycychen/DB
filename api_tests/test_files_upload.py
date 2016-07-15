@@ -13,7 +13,7 @@ from helper_library_DB import Fake
 
 d = Dropbox()
 f = Fake()
-"""
+
 @pytest.mark.upload
 # Objective - Test if the api can upload a file to DB.
 # Expected Outcome - Assert http status code == 200 and use the search
@@ -482,43 +482,19 @@ def test_upload_error_disallowed_name():
     r2 = d.db_search(my_data2=my_data2)
     check_assert = json.loads(r2.text)['matches']
     assert r1.status_code != 200 and check_assert == []
+
 """
 @pytest.mark.upload
 # Objective - Create a situation where the user goes over the available
-# space (bytes) when uploading a file (150mb).
+# space (bytes) when uploading a file.
 # Expected Outcome - Assert http code != 200 and use the search api to
 # assert the file does not exist.
 def test_upload_error_insufficient_space():
-    #Creating a fake file name
-    fake_name = f.create_file_name()
-    #create a temporary file to memory
-    tf = tempfile.NamedTemporaryFile(delete=False)
-    fake_file = tf.name
-    tfile = tf.write('Hello World!!' * (100000*150))
-    base_dir = "{\"path\":\"/"
-    filename = fake_name+"\"}"
-    db_path = os.path.join(base_dir, filename)
-    my_headers = {
-        "Authorization": d.authorization,
-        "Content-Type": "application/octet-stream",
-        "Dropbox-API-Arg": db_path
-    }
-    my_data = open(fake_file, "rb").read()
-    r1 = d.db_upload(my_headers=my_headers,my_data=my_data)
-    #Have to set a delay, otherwise the assert will check before the file has
-    # been uploaded into the DB database.
-    time.sleep(10)
-    my_data2 = {"path": "", "query": fake_name}
-    r2 = d.db_search(my_data2=my_data2)
-    check_assert = json.loads(r2.text)['matches'][0]['metadata']['path_lower']
-    assert r1.status_code == 200 and check_assert == '/'+fake_name
-
-"""
+    assert True == False
 # Objective - Create a situation that does not give the user permission
 # to write to the target location.
 # Expected Outcome - Assert http code != 200 and use the search api to
 # assert the file does not exist.
 def test_upload_error_no_write_permission():
     assert True == False
-
 """
