@@ -2,22 +2,29 @@
 This is a Dropbox API. All information can be found at the below web address:
 https://www.dropbox.com/developers/documentation/http/documentation.
 """
-
 import tempfile
 import json
 import pytest
 import time
 import os
+import requests
 from helper_library_DB import Dropbox
 from helper_library_DB import Fake
+from helper_library_DB import my_fixture
 
 d = Dropbox()
 f = Fake()
 
 @pytest.mark.search
-def test_search_valid():
-    assert True == False
+def test_search_valid(my_fixture):
+    print "\n This is my test"
 
+    my_data2 = {"path": "", "query": fake_name}
+    r2 = d.db_search(my_data2=my_data2)
+    check_assert = json.loads(r2.text)['matches'][0]['metadata']['name']
+    assert check_assert == fake_name
+
+"""
 @pytest.mark.search
 def test_search_invalid():
     assert True == False
@@ -89,3 +96,4 @@ def test_search_mode_filename_and_content():
 @pytest.mark.search
 def test_search_mode_deleted_file_name():
     assert True == False
+"""
