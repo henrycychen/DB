@@ -26,14 +26,16 @@ class Dropbox(object):
     db_create_folder_url = "https://api.dropboxapi.com/2/files/create_folder"
 
     def db_upload(self, my_headers, my_data):
-        return requests.post(Dropbox().db_upload_url, headers=my_headers, data=my_data)
+        return requests.post(Dropbox().db_upload_url, headers=my_headers,
+                             data=my_data)
 
     def db_search(self, my_data2):
         my_headers2 = {
         "Authorization": Dropbox().authorization,
         "Content-Type": "application/json"
         }
-        return requests.post(Dropbox().db_search_url, headers=my_headers2, data=json.dumps(my_data2))
+        return requests.post(Dropbox().db_search_url, headers=my_headers2,
+                             data=json.dumps(my_data2))
 
     def db_get_account(self):
         headers = {
@@ -41,9 +43,8 @@ class Dropbox(object):
         "Content-Type": "application/json"
         }
         data = None
-        return requests.post(Dropbox().db_account_url, headers=headers, data=json.dumps(data))
-
-
+        return requests.post(Dropbox().db_account_url, headers=headers,
+                             data=json.dumps(data))
 
 class Fake(object):
 
@@ -119,7 +120,8 @@ def my_fixture(request):
         data = {
             "path": "/test/"+fake_name
         }
-        r2 = requests.post(Dropbox().db_delete_url, headers=headers, data=json.dumps(data))
+        r2 = requests.post(Dropbox().db_delete_url, headers=headers,
+                           data=json.dumps(data))
     request.addfinalizer(fin)
     return fake_name
 
@@ -169,12 +171,14 @@ def my_fixture2(request):
         data = {
             "path": "/test/"+fake_name
         }
-        r3 = requests.post(Dropbox().db_delete_url, headers=headers, data=json.dumps(data))
+        r3 = requests.post(Dropbox().db_delete_url, headers=headers,
+                           data=json.dumps(data))
         print "Deleting 1st file"
         data = {
             "path": "/test2/"+fake_name
         }
-        r4 = requests.post(Dropbox().db_delete_url, headers=headers, data=json.dumps(data))
+        r4 = requests.post(Dropbox().db_delete_url, headers=headers,
+                           data=json.dumps(data))
         print "Deleting 2nd file"
     request.addfinalizer(fin)
     return fake_name
@@ -212,7 +216,8 @@ def my_fixture3(request):
     data = {
         "path": "/"+fake_name
     }
-    r2 = requests.post(Dropbox().db_create_folder_url, headers=headers, data=json.dumps(data))
+    r2 = requests.post(Dropbox().db_create_folder_url, headers=headers,
+                       data=json.dumps(data))
     print "\nCreated folder"
 
     #Tear down mode, delete file and folder
@@ -224,13 +229,15 @@ def my_fixture3(request):
         data = {
             "path": "/test/"+fake_name
         }
-        r3 = requests.post(Dropbox().db_delete_url, headers=headers, data=json.dumps(data))
+        r3 = requests.post(Dropbox().db_delete_url, headers=headers,
+                           data=json.dumps(data))
         print "Deleted file"
 
         data = {
             "path": "/"+fake_name
         }
-        r3 = requests.post(Dropbox().db_delete_url, headers=headers, data=json.dumps(data))
+        r3 = requests.post(Dropbox().db_delete_url, headers=headers,
+                           data=json.dumps(data))
         print "Deleted folder"
     request.addfinalizer(fin)
     return fake_name
